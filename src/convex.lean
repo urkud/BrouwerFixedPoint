@@ -7,31 +7,10 @@ import .linear_algebra
 import analysis.normed_space.hahn_banach.extension
 import analysis.normed_space.add_torsor_bases
 
-lemma convex_with_zero_in_int_is_absorbing {E : Type*} [seminormed_add_comm_group E]
-  [normed_space ℝ E] (s : set E) (hs₁ : convex ℝ s) (hs₂ : (0 : E) ∈ interior s)
-  : absorbent ℝ s :=
-begin
-  obtain ⟨t, ⟨ht1, ht2⟩, ht3⟩ := hs₂,
-  rw metric.is_open_iff at ht1,
-  obtain ⟨r, hr1, hr2⟩ := ht1 0 ht3,
-  rw absorbent_iff_nonneg_lt, intro x, 
-  have H : 0 ≤ r⁻¹ * ∥x∥ := mul_nonneg (inv_nonneg.mpr (le_of_lt hr1)) (norm_nonneg x),
-  refine ⟨r⁻¹ * ∥x∥, H, _⟩,
-  intros a ha,
-  have H' : 0 < ∥a∥ := lt_of_le_of_lt H ha,
-  refine ⟨a⁻¹ • x, ht2 (hr2 _), _⟩,
-  { rw [mem_ball_zero_iff, norm_smul, mul_comm, norm_inv, mul_inv_lt_iff,
-        mul_comm, ← mul_inv_lt_iff, mul_comm], exact ha,
-    { exact hr1 },
-    { exact H' } },
-  { rw ← mul_smul, rw mul_inv_cancel, exact one_smul _ x,
-    intro ha', rw [ha', norm_zero] at H', exact lt_irrefl 0 H' }
-end
-
 lemma gauge_cont {E : Type*} [seminormed_add_comm_group E] [normed_space ℝ E] (s : set E)
   (hs₁ : convex ℝ s) (hs₂ : (0 : E) ∈ interior s) : uniform_continuous (gauge s) := 
 begin
-  have absorbs := convex_with_zero_in_int_is_absorbing s hs₁ hs₂,
+  have absorbs := absorbent_nhds_zero (mem_interior_iff_mem_nhds.1 hs₂),
   obtain ⟨t, ⟨ht1, ht2⟩, ht3⟩ := hs₂,
   rw metric.is_open_iff at ht1,
   obtain ⟨r, hr1, hr2⟩ := ht1 0 ht3,
@@ -64,8 +43,9 @@ begin
     all_goals 
     { rw sub_le_iff_le_add,
       refine le_trans (le_of_eq _) (gauge_add_le hs₁ absorbs _ _), rw sub_add_cancel } },
-  { apply max_lt; apply H, exact hxy, rw norm_sub_rev, exact hxy }
-end.
+  { apply max_lt; apply H, exact hxy, rw norm_sub_rev, exact hxy },
+  apply_instance
+end
 
 noncomputable
 def normalize_by (K E : Type*) [is_R_or_C K] [normed_add_comm_group E] [normed_space K E]
