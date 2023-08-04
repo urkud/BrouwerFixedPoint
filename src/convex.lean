@@ -147,16 +147,16 @@ begin
   { rintros x hx,
     have h1 := convex.interior hs₁,
     refine lt_of_le_of_lt (gauge_mono _ interior_subset x) _,
-    { apply convex_with_zero_in_int_is_absorbing,
-      { assumption }, { rw interior_interior, assumption } },
+    { apply absorbent_nhds_zero,
+      rwa [is_open_interior.mem_nhds_iff] },
     { apply gauge_lt_one_of_mem_of_open,
       { assumption },
       { assumption },
       { exact is_open_interior },
       { assumption } } },
   { apply interior_maximal,
-    { refine gauge_lt_one_subset_self hs₁ (interior_subset hs₂)
-                                      (convex_with_zero_in_int_is_absorbing s hs₁ hs₂) },
+    { exact gauge_lt_one_subset_self hs₁ (interior_subset hs₂)
+        (absorbent_nhds_zero $ mem_interior_iff_mem_nhds.1 hs₂) },
     { assumption } }
 end
 
@@ -208,7 +208,7 @@ begin
       { rw set.mem_smul_set_iff_inv_smul_mem₀ at hx, assumption,
         exact ne.symm (ne_of_lt hr1'') } },
     { apply absorbent.gauge_set_nonempty,
-      apply convex_with_zero_in_int_is_absorbing; assumption } },
+      apply absorbent_nhds_zero, rwa [← mem_interior_iff_mem_nhds] } },
 end.
 
 lemma gauge_eq_zero_iff {E : Type*} [normed_add_comm_group E] [normed_space ℝ E]
@@ -259,7 +259,7 @@ def compact_convex_with_zero_in_interior_homeo_to_ball
        exact div_nonneg zero_le_two (le_of_lt hr1),
        exact le_of_lt h },
   have h2 : absorbent ℝ s,
-  { apply convex_with_zero_in_int_is_absorbing; assumption },
+  { apply absorbent_nhds_zero, rwa [← mem_interior_iff_mem_nhds] },
   have h3 : metric.bounded s, from hs₃.bounded,
   let X := @CompHaus.of s _ (is_compact_iff_compact_space.mp hs₃) _,
       Y := @CompHaus.of _ _ (is_compact_iff_compact_space.mp h1) _ in
